@@ -1,0 +1,19 @@
+---
+- name: 모든 관리대상 호스트 전원 끄기
+  hosts: all
+  gather_facts: false
+  tasks:
+    - name: 전원 끄기
+      community.general.shutdown:
+        delay: 0
+      ignore_unreachable: true
+
+- name: 제어노드 전원 끄기
+  hosts: localhost
+  gather_facts: false
+  tasks:
+    - name: 전원 끄기 2
+      ansible.posix.at:
+        command: shutdown -h now
+        count: 1
+        units: minutes

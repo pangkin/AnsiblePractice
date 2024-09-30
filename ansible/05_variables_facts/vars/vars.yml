@@ -1,0 +1,17 @@
+pkgs:
+  - firewalld
+  - httpd
+  - mod_ssl
+conf_web_src: files/httpd.conf
+conf_web_dst: /etc/httpd/conf/httpd.conf
+htaccess_src: files/.htaccess
+htaccess_dst: /var/www/html/.htaccess
+htpasswd_src: files/htpasswd
+htpasswd_dst: /etc/httpd/secrets/htpasswd
+mainpage: /var/www/html/index.html
+svcs:
+  - httpd
+  - firewalld
+fw_svcs:
+  - http
+  - https

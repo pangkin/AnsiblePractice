@@ -1,0 +1,38 @@
+---
+- name: 웹서버 설정 및 점검
+  hosts: web1
+  tasks:
+    - name: 방화벽/웹 패키지 설치
+      ansible.builtin.dnf:
+        name:
+          - httpd
+          - firewalld
+        state: present
+    - name: 웹 페이지 설정
+      ansible.builtin.copy:
+        content: "My Web Server Page\n"
+        dest: /var/www/html/index.html
+        mode: '0644'
+    - name: 방화벽/웹 서비스 기동
+      ansible.builtin.service:
+        name: "{{ item }}"
+        state: started
+        enabled: true
+      loop:
+        - httpd
+        - firewalld
+    - name: 방화벽 등록
+      ansible.posix.firewalld:
+        service: http
+        state: enabled
+        permanent: true
+        immediate: true
+- name: 웹페이지 확인
+  hosts: localhost
+  become: false
+  tasks:
+    - name: 웹페이지 테스트
+      ansible.builtin.uri:
+        url: http://web1.example.com
+        return_content: true
+        status_code: 200

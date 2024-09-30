@@ -1,0 +1,7 @@
+[packages]
+pkg_db = mariadb-server
+pkg_web = httpd
+
+[services]
+svc_db = mariadb
+svc_web = httpd

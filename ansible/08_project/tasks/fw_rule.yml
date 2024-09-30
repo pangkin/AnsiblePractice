@@ -1,0 +1,8 @@
+---
+- name: 방화벽 서비스 조정 - {{ services, state }}
+  ansible.posix.firewalld:
+    service: "{{ item }}"
+    state: "{{ state }}"
+    permanent: true
+    immediate: true
+  loop: "{{ services }}"

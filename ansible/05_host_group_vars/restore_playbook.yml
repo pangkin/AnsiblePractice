@@ -1,0 +1,12 @@
+---
+- name: dd
+  hosts: all
+  tasks:
+    - name: 패키지 제거
+      dnf:
+        name:
+          - httpd
+          - mariadb-server
+          - php
+          - mutt
+        state: absent

@@ -1,0 +1,27 @@
+---
+- name: Playbook Control Job
+  hosts: webservers
+  gather_facts: true
+  vars_files:
+    - vars.yml
+  tasks:
+    - name: 1. 방화벽 포트 제거
+      ansible.posix.firewalld:
+        service: "{{ item }}"
+        state: disabled
+        permanent: true
+        immediate: true
+      loop:
+        - http
+        - https
+    - name: 2. 설정 파일 제거
+      ansible.builtin.file:
+        path: /var/www/html/index.html
+        state: absent
+
+    - name: 3. 패키지 제거
+      ansible.builtin.yum:
+        name:
+          - httpd
+          - mod_ssl
+        state: absent

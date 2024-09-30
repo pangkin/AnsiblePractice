@@ -1,0 +1,5 @@
+---
+- name: "Task - {{ packages.web_pkg }} 패키지 설치"
+  ansible.builtin.dnf:
+    name: "{{ packages.web_pkg }}"
+    state: present

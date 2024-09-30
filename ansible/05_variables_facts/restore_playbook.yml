@@ -1,0 +1,31 @@
+---
+- name: 웹 서버 설정과 인증 페이지 구성
+  hosts: all
+  vars_files:
+    - vars/vars.yml
+  tasks:
+    - name: 1. 방화벽 해제
+      ansible.posix.firewalld:
+        service: "{{ item }}"
+        permanent: true
+        immediate: true
+        state: disabled
+      loop: "{{ fw_svcs }}"
+    - name: 2.1. /etc.httpd/secrty 디렉토리 제거
+      ansible.builtin.file:
+        path: /etc/httpd/secrets
+        state: absent
+    - name: 2.2. /var/www/html/index.html 제거
+      ansible.builtin.file:
+        path: "{{ mainpage }}"
+        state: absent
+    - name: 2-3. /var/www/html/.htaccess 파일 제거
+      ansible.builtin.file:
+        path: "{{ htaccess_dst }}"
+        state: absent
+    - name: 3. 패키지 제거
+      ansible.builtin.dnf:
+        name:
+          - httpd
+          - mod_ssl
+        state: absent

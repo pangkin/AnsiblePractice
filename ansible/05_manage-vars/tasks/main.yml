@@ -1,0 +1,16 @@
+---
+- name: 1) 패키지 설치
+  ansible.builtin.dnf:
+    name:
+      - "{{ ansible_local.custom.packages.pkg_db }}"
+      - "{{ ansible_local.custom.packages.pkg_web }}"
+    state: latest
+- name: 2) 서비스 기동
+  ansible.builtin.service:
+    name: "{{ item }}"
+    state: restarted
+    enabled: true
+  loop:
+    - "{{ ansible_local.custom.services.svc_db }}"
+    - "{{ ansible_local.custom.services.svc_web }}"
+

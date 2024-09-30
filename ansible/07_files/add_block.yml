@@ -1,0 +1,11 @@
+---
+- name: 파일에 블럭 추가
+  hosts: all
+  tasks:
+    - name: 블럭 추가
+      ansible.builtin.blockinfile:
+        path: /home/devops/users.txt
+        block: |
+          This block of text consists of two lines.
+          They have been added by the blockinfile module.
+        state: present

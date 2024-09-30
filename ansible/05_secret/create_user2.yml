@@ -1,0 +1,12 @@
+---
+- name: 사용자 추가
+  hosts: web2.example.com
+  become: true
+  remote_user: ansible
+  vars_files:
+    - secret2.yml
+  tasks:
+    - name: 사용자 추가 동작 - {{ pwhash | password_hash('sha512') }}
+      ansible.builtin.user:
+        name: "{{ username }}"
+        password: "{{ pwhash | password_hash('sha512') }}"

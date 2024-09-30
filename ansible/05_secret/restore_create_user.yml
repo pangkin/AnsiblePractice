@@ -1,0 +1,9 @@
+---
+- name: 사용자 제거
+  hosts: webservers
+  tasks:
+    - name: 사용자 제거 동작
+      ansible.builtin.user:
+        name: user1
+        state: absent
+        remove: true

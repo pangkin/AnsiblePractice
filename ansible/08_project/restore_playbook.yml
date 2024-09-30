@@ -1,0 +1,25 @@
+---
+- name: 웹 서버 복원
+  hosts: webservers
+  tasks:
+    - name: 방화벽 포트 제거
+      ansible.builtin.include_tasks:
+        file: tasks/fw_rule.yml
+      vars:
+        services: ['http', 'https']
+        state: disabled
+    - name: 서비스 stop
+      ansible.builtin.include_tasks:
+        file: tasks/stopsvc.yml
+      vars:
+        services: ['httpd']
+    - name: 파일 삭제
+      ansible.builtin.include_tasks:
+        file: tasks/removefile.yml
+      vars:
+        files: ['/var/www/html/index.html']
+    - name: 패키지 삭제
+      ansible.builtin.include_tasks:
+        file: tasks/removepkg.yml
+      vars:
+        packages: ['httpd', 'mod_ssl']

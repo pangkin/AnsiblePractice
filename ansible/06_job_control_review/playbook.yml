@@ -1,0 +1,60 @@
+---
+- name: Playbook Control Job
+  hosts: webservers
+  gather_facts: true
+  vars_files:
+    - vars.yml
+  tasks:
+    # 1. 정보 수집 & 필수 사양 점검
+    # - 배포판이 CentOS가 아니면 실패
+    # - 메모리 256mb 미만이면 실패
+    - name: 1. 시스템 사양 점검
+      ansible.builtin.fail:
+        msg: "이 서버({{ inventory_hostname }})는 최소 사양에 만족하지 않습니다."
+      when: >
+        ansible_distribution != "CentOS" or
+        ansible_memtotal_mb < min_ram_mb
+    # 2. 패키지 설치 - httpd, mod_ssl, firewalld
+    - name: 2. 패키지 설치
+      ansible.builtin.yum:
+        name: "{{ packages }}"
+        state: present
+    # 3. 서비스 기동 - httpd, firewalld
+    - name: 3. 서비스 기동
+      ansible.builtin.service:
+        name: "{{ item }}"
+        state: started
+        enabled: true
+      loop: "{{ services }}"
+    # 4. 웹 서버 HTTPS 설정 - notify ~ handlers
+    # - /etc/pki/tls/certs/localhost.crt
+    # - /etc/pki/tls/certs/localhost.key
+    # - /var/www/html/index.html
+    - name: 4. 웹서버 HTTPS 설정
+      block:
+        - name: 4.1. 설정 파일 배포
+          ansible.builtin.copy:
+            src: "{{ item.src }}"
+            dest: "{{ item.dest }}"
+          loop: "{{ web_config_files }}"
+          notify: Restart web
+      rescue:
+        - name: 4.2. 설정 파일 배포 에러 메세지 출력
+          ansible.builtin.debug:
+            msg: "하나 이상의 설정 파일 배포에 문제가 발생"
+    # 5. 방화벽 포트 등록 - http, https
+    - name: 5. 방화벽 포트 등록
+      ansible.posix.firewalld:
+        service: "{{ item }}"
+        state: enabled
+        permanent: true
+        immediate: true
+      loop:
+        - http
+        - https
+  # 6. handlers
+  handlers:
+    - name: Restart web
+      ansible.builtin.service:
+        name: "{{ web_service }}"
+        state: restarted

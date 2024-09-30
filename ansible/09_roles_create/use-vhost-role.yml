@@ -1,0 +1,16 @@
+---
+- name: 0) myvhost 역할 생성
+  hosts: webservers
+  gather_facts: true
+  tasks:
+    - name: 1) myvhost 시작 메세지
+      ansible.builtin.debug:
+        msg: "웹 서버 설정 시작"
+
+    - name: 2) myvhost 실행
+      ansible.builtin.include_role:
+        name: myvhost
+
+    - name: 3) myvhost 완료 메세지
+      ansible.builtin.debug:
+        msg: "웹 서버 설정 완료"

@@ -1,0 +1,8 @@
+---
+- name: 역할 설치
+  hosts: web1
+  gather_facts: true
+  become: true
+
+  roles:
+    - davidkarban.git

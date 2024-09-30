@@ -1,0 +1,44 @@
+---
+- name: Install database packages
+  ansible.builtin.yum:
+    name: "{{ item }}"
+    state: present
+  with_items: "{{ db_packages }}"
+  tags:
+    - dev
+  notify:
+    - start_db
+
+- name: Get small config file
+  ansible.builtin.get_url:
+    url: "{{ db_config_src_path_small }}"
+    dest: "{{ db_config_path }}"
+  when: db_config_src_path_small is defined
+  notify:
+    - restart_db
+  tags:
+    - dev
+
+- name: Get large config file
+  ansible.builtin.get_url:
+    url: "{{ db_config_src_path_large }}"
+    dest: "{{ db_config_path }}"
+  when: db_config_src_path_large is defined
+  notify:
+    - restart_db
+  tags:
+    - prod
+
+- name: Update motd for development
+  ansible.builtin.copy:
+    content: "This is a development server"
+    dest: /etc/motd
+  tags:
+    - dev
+
+- name: Update motd for production
+  ansible.builtin.copy:
+    content: "This is a production server"
+    dest: /etc/motd
+  tags:
+    - prod

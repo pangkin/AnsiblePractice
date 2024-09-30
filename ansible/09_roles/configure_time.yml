@@ -1,0 +1,16 @@
+---
+- name: 시간 동기화
+  hosts: datacenters
+
+  roles:
+    - rhel-system-roles.timesync
+  post_tasks:
+    - name: 타임존 설정
+      community.general.timezone:
+        name: "{{ host_timezone }}"
+      notify: Restart chronyd
+  handlers:
+    - name: Restart chronyd
+      ansible.builtin.service:
+        name: chronyd
+        state: restarted

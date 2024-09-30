@@ -1,0 +1,11 @@
+---
+- name: Using the copy module
+  hosts: all
+  tasks:
+    - name: Copy a file to managed hosts and set attributes
+      ansible.builtin.copy:
+        src: files/users.txt
+        dest: /home/devops/users.txt
+        owner: devops
+        group: devops
+        mode: '0640'

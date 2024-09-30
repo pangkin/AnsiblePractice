@@ -1,0 +1,56 @@
+---
+- name: 웹서버 구성
+  hosts: webserver
+  vars:
+    pkg_web: httpd
+    pkg_web_https: mod_ssl
+    pkg_firewall: firewalld
+    pkg_python: python3-PyMySQL
+    svc_web_fw:
+      - httpd.service
+      - firewalld.service
+    fw_webs:
+      - http
+      - https
+  tasks:
+    - name: 패키지 설치
+      ansible.builtin.dnf:
+        name:
+          - "{{ pkg_web }}"
+          - "{{ pkg_web_https }}"
+          - "{{ pkg_firewall }}"
+          - "{{ pkg_python }}"
+        state: latest
+    - name: 서비스 설정
+      ansible.builtin.copy:
+        content: "Example web Content.\n"
+        dest: /var/www/html/index.html
+        mode: '0644'
+    - name: 서비스 기동
+      ansible.builtin.service:
+        name: "{{ item }}"
+        state: started
+        enabled: true
+      loop: "{{ svc_web_fw }}"
+    - name: 방화벽 등록
+      ansible.posix.firewalld:
+        service: "{{ item }}"
+        permanent: true
+        immediate: true
+        state: enabled
+      loop: "{{ fw_webs }}"
+- name: 웹 확인
+  hosts: localhost
+  become: false
+  tasks:
+    - name: 웹페이지 확인
+      ansible.builtin.uri:
+        url: http://web1.example.com
+        return_content: true
+        status_code: 200
+    - name: 웹페이지 확인2
+      ansible.builtin.uri:
+        url: https://web1.example.com
+        return_content: true
+        status_code: 200
+        validate_certs: false

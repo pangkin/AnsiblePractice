@@ -1,0 +1,6 @@
+---
+- name: 웹서버 index.html 생성
+  ansible.builtin.copy:
+    content: "{{ ansible_fqdn }}: {{ ansible_all_ipv4_addresses }}"
+    dest: "{{ indexfile }}"
+    mode: '0644'

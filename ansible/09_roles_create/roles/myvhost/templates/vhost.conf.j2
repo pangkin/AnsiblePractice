@@ -1,0 +1,15 @@
+<VirtualHost *:80>
+    ServerAdmin webmaster@{{ ansible_fqdn }}
+    DocumentRoot "/var/www/vhosts/{{ ansible_hostname }}"
+    ServerName {{ ansible_fqdn }}
+    ServerAlias example.com
+
+    ErrorLog "/var/log/httpd/{{ ansible_fqdn }}-error_log"
+    CustomLog "/var/log/httpd/{{ ansible_fqdn }}-access_log" common
+
+    <Directory /var/www/vhosts/{{ ansible_hostname }}>
+        Options Indexes FollowSymLinks
+        AllowOverride None
+        Require all granted
+    </Directory>
+</VirtualHost>

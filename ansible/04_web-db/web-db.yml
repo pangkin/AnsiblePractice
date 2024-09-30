@@ -1,0 +1,43 @@
+---
+- name: 웹서비스 설정 및 확인
+  hosts: web1
+  tasks:
+    - name: 패키지 설치
+      ansible.builtin.dnf:
+        name:
+          - firewalld
+          - httpd
+          - mariadb-server
+          - php
+          - php-mysqlnd
+          - php-pdo
+        state: present
+    - name: 웹페이지 다운로드
+      ansible.builtin.get_url:
+        url: http://192.168.10.10/index.php
+        dest: /var/www/html/index.php
+        mode: '0644'
+    - name: 서비스 기동
+      ansible.builtin.service:
+        name: "{{ item }}"
+        state: started
+        enabled: true
+      loop:
+        - httpd
+        - firewalld
+        - mariadb
+    - name: 방화벽 서비스 등록
+      ansible.posix.firewalld:
+        service: http
+        permanent: true
+        immediate: true
+        state: enabled
+- name: 웹 요청
+  hosts: localhost
+  become: false
+  tasks:
+    - name: 웹 요청
+      ansible.builtin.uri:
+        url: http://web1.example.com/index.php
+        return_content: true
+        status_code: 200

@@ -1,0 +1,9 @@
+#!/bin/bash
+
+if [ $# -ne 1 ] ; then
+	echo "Usage: $0 <fact variable>"
+	exit 1
+fi
+FACT=$1
+
+ansible localhost -m setup -a "filter=${FACT}"

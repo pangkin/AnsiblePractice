@@ -1,0 +1,25 @@
+---
+- name: 0) 파일 서버 패키지 설치
+  hosts: fileservers
+  gather_facts: true
+  tasks:
+    - name: 1) 변수 정의
+      ansible.builtin.include_vars:
+        file: package.yml
+
+    - name: 2) 태스크 정의
+      ansible.builtin.include_tasks:
+        file: install_package.yml
+
+    - name: 3) 태스크 정의
+      ansible.builtin.include_tasks:
+        file: install_package.yml
+      vars:
+        packages:
+          web_pkg: epel-release
+    - name: 4) 태스크 정의
+      ansible.builtin.include_tasks:
+        file: install_package.yml
+      vars:
+        packages:
+          web_pkg: tomcat

@@ -1,0 +1,8 @@
+---
+- name: dd
+  hosts: all
+  tasks:
+    - name: 패키지 설치 - {{ package }}
+      dnf:
+        name: "{{ package }}"
+        state: latest

@@ -1,0 +1,23 @@
+---
+- name: Restore site.yml
+  hosts: all
+  tasks:
+    - name: Close web port
+      ansible.posix.firewalld:
+        service: http
+        state: disabled
+        permanent: true
+        immediate: true
+    - name: Disable web service
+      ansible.builtin.service:
+        name: httpd
+        state: stopped
+        enabled: false
+    - name: Remove index.html
+      ansible.builtin.file:
+        path: /var/www/html/index.html
+        state: absent
+    - name: Remove web packages
+      ansible.builtin.dnf:
+        name: httpd
+        state: absent

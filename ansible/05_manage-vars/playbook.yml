@@ -1,0 +1,33 @@
+---
+- name: 0) lamp 그룹 서버 설치 및 설정
+  hosts: lamp
+  gather_facts: true
+  vars:
+    pkg_fw: firewalld
+    svc_fw: firewalld
+    svcs_fw:
+      - http
+      - https
+  tasks:
+    - name: 1) 변수 파일 포함
+      ansible.builtin.include_vars:
+        file: vars/main.yml
+    - name: 2) 태스크 포함
+      ansible.builtin.include_tasks:
+        file: tasks/main.yml
+    - name: 3) 방화벽 패키지 설치
+      ansible.builtin.dnf:
+        name: "{{ pkg_fw }}"
+        state: latest
+    - name: 4) 방화벽 서비스 기동
+      ansible.builtin.service:
+        name: "{{ svc_fw }}"
+        state: restarted
+        enabled: true
+    - name: 5) 방화벽 포트 등록
+      ansible.posix.firewalld:
+        service: "{{ item }}"
+        permanent: true
+        immediate: true
+        state: enabled
+      loop: "{{ svcs_fw }}"

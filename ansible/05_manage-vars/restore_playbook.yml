@@ -1,0 +1,41 @@
+---
+- name: 0) lamp 그룹 서버 복원
+  hosts: lamp
+  gather_facts: true
+  vars:
+    svcs_fw:
+      - http
+      - https
+  tasks:
+    - name: 0) 변수 포함
+      ansible.builtin.include_vars:
+        file: vars/main.yml
+    # 1) 방화벽 포트 제거 - http, https
+    - name: 1) 방화벽 포트 제거
+      ansible.posix.firewalld:
+        service: "{{ item }}"
+        permanent: true
+        immediate: true
+        state: disabled
+      loop: "{{ svcs_fw }}"
+    # 2) 서비스 내리기 - httpd, mariadb
+    - name: 2) 서비스 종료
+      ansible.builtin.service:
+        name: "{{ item }}"
+        state: stopped
+        enabled: false
+      loop:
+        - "{{ ansible_local.custom.services.svc_db }}"
+        - "{{ ansible_local.custom.services.svc_web }}"
+    # 3) 설정 삭제 - /var/www/html/index.html
+    - name: 3)설정 삭제 - /var/www/html/index.html
+      ansible.builtin.file:
+        path: "{{ webroot }}/index.html"
+        state: absent
+    # 4) 패키지 삭제 - httpd, mariadb-server
+    - name: 패키지 삭제 - httpd, mariadb-server
+      ansible.builtin.dnf:
+        name:
+          - "{{ ansible_local.custom.packages.pkg_db }}"
+          - "{{ ansible_local.custom.packages.pkg_web }}"
+        state: absent

@@ -1,0 +1,11 @@
+---
+- name: 0) 파일 배포
+  hosts: all
+  tasks:
+    - name: 1) /etc/hosts.j2 파일 배포 - 템플릿 사용
+      ansible.builtin.template:
+        src: templates/hosts.j2
+        dest: /root/hosts
+        owner: root
+        group: root
+        mode: '0644'

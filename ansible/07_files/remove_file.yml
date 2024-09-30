@@ -1,0 +1,9 @@
+---
+- name: Remove file
+  hosts: all
+  gather_facts: false
+  tasks:
+    - name: Remove file /home/devops/users.txt
+      ansible.builtin.file:
+        path: /home/devops/users.txt
+        state: absent

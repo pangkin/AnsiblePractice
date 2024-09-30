@@ -1,0 +1,7 @@
+---
+- name: 서비스 종료 - {{ services }}
+  ansible.builtin.systemd:
+    name: "{{ item }}"
+    state: stopped
+    daemon_reload: true
+  loop: "{{ services }}"

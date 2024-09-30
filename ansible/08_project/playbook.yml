@@ -1,0 +1,44 @@
+---
+- name: 0. 웹 서버 설정
+  hosts: webservers
+  gather_facts: true
+  tasks:
+    # 1. 웹 서버 설치 및 서비스 기동
+    - name: 1. 웹 서버 설치 및 서비스 기동
+      ansible.builtin.include_tasks:
+        file: tasks/install-pkg-and-start-svc.yml
+      vars:
+        packages: ['httpd', 'mod_ssl']
+        services: ['httpd']
+      when: ansible_distribution == 'CentOS'
+
+    # 2. 웹 서버 설정
+    - name: 2. 웹 서버 설정 - index.html
+      ansible.builtin.import_tasks:
+        file: tasks/webindex.yml
+      vars:
+        indexfile: /var/www/html/index.html
+      when: ansible_distribution_version == '9'
+
+    # 3. 방화벽 설정
+    - name: 방화벽 패키지 설치 및 서비스 기동
+      ansible.builtin.include_tasks:
+        file: tasks/install-pkg-and-start-svc.yml
+      vars:
+        packages: ['firewalld']
+        services: ['firewalld']
+
+    - name: 방화벽 포트 등록
+      ansible.posix.firewalld:
+        service: "{{ item }}"
+        state: enabled
+        permanent: true
+        immediate: true
+      loop: ['http', 'https']
+
+# 4. 웹 서비스 확인 (별도의 플레이)
+- name: 웹 서비스 확인
+  ansible.builtin.import_playbook: plays/webverify.yml
+  vars:
+    myhost: localhost
+    myurl: http://ansible1.example.com

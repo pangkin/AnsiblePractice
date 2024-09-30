@@ -1,0 +1,24 @@
+---
+- name: 0) 사용자 생성 + 공개 키 인증
+  hosts: all
+  gather_facts: false
+  tasks:
+    # 1) 사용자 생성과 암호 설정 - user100
+    - name: 1) 사용자 생성과 암호 설정 - user100/soldesk1.
+      ansible.builtin.user:
+        name: user100
+        password: "{{ 'soldesk1.' | password_hash('sha512') }}"
+    # 2) /etc/sudoers.d/user100 파일 생성
+    - name: 2) /etc/sudoers.d/user100 파일 생성
+      ansible.builtin.copy:
+        src: files/user100
+        dest: /etc/sudoers.d/user100
+        mode: '0440'
+    # 3) ~/.ssh/id_rsa.pub -> ~user100/.ssh/authorized_keys
+    - name: 3) authorized_keys 파일 내용 추가
+      ansible.posix.authorized_key:
+        user: user100
+        state: present
+        key: "{{ item }}"
+      with_file:
+        - ~/.ssh/id_rsa.pub

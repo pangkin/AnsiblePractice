@@ -1,0 +1,13 @@
+---
+- name: Restore Task Failure Exercise
+  hosts: databases
+  vars:
+    web_package: httpd
+    db_package: mariadb-server
+  tasks:
+    - name: Remove package
+      ansible.builtin.yum:
+        name:
+          - "{{ web_package }}"
+          - "{{ db_package }}"
+        state: absent

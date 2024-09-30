@@ -1,0 +1,11 @@
+---
+- name: 패키지 설치
+  ansible.builtin.dnf:
+    name: "{{ packages }}"
+    state: present
+- name: 서비스 기동
+  ansible.builtin.systemd:
+    name: "{{ item }}"
+    state: started
+    enabled: true
+  loop: "{{ services }}"

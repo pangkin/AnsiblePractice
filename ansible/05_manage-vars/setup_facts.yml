@@ -1,0 +1,18 @@
+---
+- name: 0) 팩트 배포
+  hosts: web1
+  gather_facts: false
+  vars:
+    fact_dir: /etc/ansible/facts.d
+    fact_src: files/custom.fact
+  tasks:
+    - name: 1) 원격 디렉토리 생성 - {{ fact_dir }}
+      ansible.builtin.file:
+        path: "{{ fact_dir }}"
+        state: directory
+        mode: '0755'
+    - name: 2) 팩트 파일 배포 - {{ fact_src }}
+      ansible.builtin.copy:
+        src: "{{ fact_src }}"
+        dest: "{{ fact_dir }}"
+        mode: '0644'

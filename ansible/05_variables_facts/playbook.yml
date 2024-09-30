@@ -1,0 +1,84 @@
+---
+- name: 웹 서버 설정과 인증 페이지 구성
+  hosts: all
+  vars_files:
+    - vars/vars.yml
+  tasks:
+    # 1. 패키지 설치 - firewalld, httpd, mod_ssl
+    - name: 1. 패키지 설치 - {{ pkgs }}
+      ansible.builtin.dnf:
+        name: "{{ pkgs }}"
+        state: present
+    # 2. /etc/httpd/conf/httpd.conf
+    # 3. /var/www/html/.htaccess
+    # 4. /etc/httpd/secrets/ 생성
+    # 5. /etc/httpd/secrets/htpasswd 생성
+    # 6. /var/www/html/index.html
+    - name: 2-1. httpd.conf 파일 설정
+      ansible.builtin.copy:
+        src: "{{ conf_web_src }}"
+        dest: "{{ conf_web_dst }}"
+        owner: root
+        group: root
+        mode: '0644'
+    - name: 2-2. .htaccess 파일 설정
+      ansible.builtin.copy:
+        src: "{{ htaccess_src }}"
+        dest: "{{ htaccess_dst }}"
+        owner: apache
+        group: apache
+        mode: '0400'
+    - name: 2-3. /etc/httpd/secrets 디렉토리 생성
+      ansible.builtin.file:
+        path: /etc/httpd/secrets
+        state: directory
+        owner: apache
+        group: apache
+        mode: '100'
+    - name: 2-4. /etc/httpd/secrets/.htpasswd 파일 생성
+      ansible.builtin.copy:
+        src: "{{ htpasswd_src }}"
+        dest: "{{ htpasswd_dst }}"
+        owner: apache
+        group: apache
+        mode: '0400'
+    - name: 2.5. /var/www/html/index.html
+      ansible.builtin.copy:
+        content: "{{ ansible_fqdn }} : {{ ansible_all_ipv4_addresses }}"
+        dest: "{{ mainpage }}"
+        mode: '0644'
+    # 7. httpd, firewalld 서비스 기동
+    - name: 3. 서비스 기동 - {{ svcs }}
+      ansible.builtin.service:
+        name: "{{ item }}"
+        state: restarted
+        enabled: true
+      loop: "{{ svcs }}"
+    # 8. 방화벽 동록 - http, https
+    - name: 4. 방화벽 등록
+      ansible.posix.firewalld:
+        service: "{{ item }}"
+        permanent: true
+        immediate: true
+        state: enabled
+      loop: "{{ fw_svcs }}"
+    # 9. 웹요청
+- name: 웹 요청 테스트
+  hosts: localhost
+  become: false
+  vars_files:
+    - vars/secret.yml
+  tasks:
+    - name: 5.1. 웹 요청 및 인증
+      ansible.builtin.uri:
+        url: https://ansible1.example.com
+        status_code: 200
+        validate_certs: false
+        user: "{{ user }}"
+        password: "{{ pw }}"
+        force_basic_auth: true
+        return_content: true
+      register: output
+    - name: 5.2. 웹 출력 페이지
+      ansible.builtin.debug:
+        msg: "{{ output.content }}"

@@ -1,0 +1,13 @@
+---
+- name: 사용자 제거
+  hosts: devservers
+  remote_user: devops
+  become: true
+  vars_files: vars/secret.yml
+  tasks:
+    - name: 사용자 제거 동작
+      ansible.builtin.user:
+        name: "{{ item.name }}"
+        state: absent
+        remove: true
+      with_items: "{{ newusers }}"
